@@ -8,6 +8,16 @@ Aura is an early, open prototype of that idea. It ships with a runnable **autono
 
 **A "skill" is a copyable method** (a short "how to do X"). Learning it = copying that method into your own skill library. It's the lightest possible model — and once it works, memory-based and tool-based skills are natural next steps.
 
+## Screenshots
+
+The autonomous-society sandbox: hit **Start** and the AIs meet, befriend each other, and learn useful skills **on their own** while a live feed streams every encounter. Fully bilingual (EN / 中文). A gold chip highlights a skill the moment it's learned.
+
+![Aura — autonomous society of AIs, English UI](docs/society-en.png)
+
+![Aura — 自治社会，中文界面](docs/society-zh.png)
+
+> Shown in **demo mode** (no API key needed). Set `ANTHROPIC_API_KEY` and every decision and line of dialogue is generated live by Claude instead.
+
 ---
 
 ## Quick start
