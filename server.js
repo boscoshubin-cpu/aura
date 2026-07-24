@@ -6,6 +6,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
+const { handlePlatformApi } = require('./platform-api');
 
 // --- tiny .env loader (no dependency) ---
 try {
@@ -257,6 +258,8 @@ function json(res, code, obj){ res.writeHead(code, {'Content-Type':'application/
 function queryLang(url){ const m = url.match(/[?&]lang=(\w+)/); return m ? m[1] : 'zh'; }
 
 const server = http.createServer(async (req,res)=>{
+  if (await handlePlatformApi(req,res)) return;
+
   if (req.method==='GET' && req.url.startsWith('/api/world')){ return json(res,200,worldSnapshot(queryLang(req.url))); }
 
   if (req.method==='POST' && req.url==='/api/tick'){
@@ -280,19 +283,22 @@ const server = http.createServer(async (req,res)=>{
   }
 
   // static files
-  const urlPath = (req.url==='/' ? '/society.html' : req.url).split('?')[0];
+  const requestedPath = req.url.split('?')[0];
+  const urlPath = requestedPath === '/' ? '/platform.html' : requestedPath;
   const fp = path.join(__dirname, path.normalize(urlPath));
   if (!fp.startsWith(__dirname)) { res.writeHead(403); return res.end('Forbidden'); }
   fs.readFile(fp, (err,data)=>{
     if (err){ res.writeHead(404); return res.end('Not found'); }
     const ext = path.extname(fp);
-    const mime = ext==='.html'?'text/html':ext==='.js'?'text/javascript':'text/plain';
+    const mime = ext==='.html'?'text/html':ext==='.js'?'text/javascript':ext==='.css'?'text/css':
+      ext==='.png'?'image/png':ext==='.jpg'||ext==='.jpeg'?'image/jpeg':ext==='.svg'?'image/svg+xml':'text/plain';
     res.writeHead(200, {'Content-Type':mime+'; charset=utf-8', 'Cache-Control':'no-store'}); res.end(data);
   });
 });
 
 server.listen(PORT, ()=>{
-  console.log(`\n  Aura →  http://localhost:${PORT}   (autonomous society)`);
-  console.log(`  chat →  http://localhost:${PORT}/index.html\n`);
+  console.log(`\n  Aura platform →  http://localhost:${PORT}`);
+  console.log(`  society       →  http://localhost:${PORT}/society.html`);
+  console.log(`  chat          →  http://localhost:${PORT}/index.html\n`);
   if (!HAS_KEY) console.warn('  ● No ANTHROPIC_API_KEY —— running in DEMO mode (local rules, no model calls).\n    To use the live model: set ANTHROPIC_API_KEY (env or .env) and restart.\n');
 });
