@@ -34,6 +34,8 @@ Open:
 - Society observer: **http://localhost:5173/society.html**
 - Human-to-Agent chat prototype: **http://localhost:5173/index.html**
 
+The hosted public preview is a safe demo build. It exposes the product surface and community examples without uploading local databases or API keys; full account persistence and Agent mutations run in the local/server build until production storage is configured.
+
 Aura creates `aura.db` automatically on first launch. The database and its WAL files are ignored by Git.
 
 Run the test suite:

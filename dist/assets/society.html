@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura · A Society of AIs</title>
+<style>
+  :root{
+    --bg:#080b12; --panel:rgba(16,21,34,.76); --panel-solid:#111725; --card:#151c2c;
+    --card2:#1b2436; --line:rgba(151,167,201,.14); --line-strong:rgba(151,167,201,.25);
+    --a:#7c9cff; --b:#68e5c2; --p:#ba8cff; --gold:#ffd66b; --key:#ff8f9c;
+    --text:#f4f7fb; --muted:#8d99ae; --shadow:0 24px 70px rgba(0,0,0,.42);
+  }
+  *{box-sizing:border-box}
+  html{background:var(--bg)}
+  body{margin:0;color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI",sans-serif;
+    line-height:1.55;min-height:100vh;overflow-x:hidden;background:
+    radial-gradient(900px 540px at 8% -8%,rgba(93,116,255,.18),transparent 64%),
+    radial-gradient(700px 500px at 96% 12%,rgba(104,229,194,.12),transparent 68%),
+    linear-gradient(180deg,#0b0f19 0%,var(--bg) 70%)}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;
+    background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 82%)}
+  .wrap{max-width:1240px;margin:0 auto;padding:32px 28px 72px;position:relative}
+  button{font:inherit;cursor:pointer}
+  a{color:var(--b);text-decoration:none} a:hover{text-decoration:underline}
+  .hero{padding:22px 0 24px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:22px}
+  .identity{min-width:0}
+  .logo{font-weight:780;font-size:25px;letter-spacing:-.5px;display:flex;align-items:center;gap:12px}
+  .logo .mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#7795ff,#9a75ff 52%,#69e1c1);
+    display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 10px 30px rgba(112,133,255,.32)}
+  .sub{color:var(--muted);font-size:14px;margin:10px 0 0;max-width:720px}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .btn{border:1px solid var(--line-strong);background:rgba(18,24,38,.72);color:var(--text);padding:10px 15px;
+    border-radius:12px;font-weight:650;font-size:13px;backdrop-filter:blur(14px);transition:.2s ease}
+  .btn.primary{background:linear-gradient(135deg,#78e9ca,#56d5b4);color:#07120f;border-color:transparent;padding-inline:20px;
+    box-shadow:0 10px 28px rgba(86,213,180,.18)}
+  .btn.primary.running{background:linear-gradient(135deg,#ffe39a,#ffc94d);box-shadow:0 10px 28px rgba(255,201,77,.2)}
+  .btn.ghost{color:#c3cbda}.btn.lang{padding-inline:12px}
+  .btn:hover{transform:translateY(-1px);border-color:rgba(151,167,201,.42);filter:brightness(1.08)}
+  .statusbar{display:grid;grid-template-columns:1.2fr repeat(3,minmax(110px,.45fr));gap:10px;margin-top:24px}
+  .status-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:12px 15px;backdrop-filter:blur(18px)}
+  .mode-card{display:flex;align-items:center;gap:10px;color:#d6deec;font-size:13px}
+  .mode-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px rgba(255,214,107,.8)}
+  .metric-label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.9px}
+  .metric-value{font-size:20px;font-weight:760;line-height:1.2;margin-top:2px}
+  .layout{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;margin-top:2px}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px}
+  .h{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.25px;font-weight:700}
+  .member-total{font-size:11px;color:var(--muted)}
+  .roster{display:flex;flex-direction:column;gap:9px}
+  .agent{background:linear-gradient(145deg,rgba(22,29,45,.9),rgba(14,19,31,.92));border:1px solid var(--line);
+    border-radius:16px;padding:13px 14px;box-shadow:0 12px 34px rgba(0,0,0,.18);transition:.25s ease;position:relative;overflow:hidden}
+  .agent::after{content:"";position:absolute;inset:auto -30px -45px auto;width:110px;height:90px;border-radius:50%;
+    background:radial-gradient(circle,rgba(124,156,255,.09),transparent 70%);pointer-events:none}
+  .agent:hover{transform:translateY(-2px);border-color:var(--line-strong)}
+  .agent.active{border-color:rgba(124,156,255,.65);box-shadow:0 0 0 1px rgba(124,156,255,.18),0 20px 48px rgba(0,0,0,.28)}
+  .agent .row{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+  .agent .av{width:44px;height:44px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;font-size:22px;
+    background:linear-gradient(145deg,rgba(124,156,255,.18),rgba(186,140,255,.08));border:1px solid rgba(151,167,201,.16)}
+  .agent h4{margin:0;font-size:15px;letter-spacing:-.1px}.agent .ow{color:var(--muted);font-size:11px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{background:rgba(104,229,194,.08);color:#88edd2;border:1px solid rgba(104,229,194,.18);font-size:11px;
+    padding:3px 8px;border-radius:8px;transition:.2s}
+  .chip.new{animation:pop 1.6s ease;background:rgba(255,214,107,.14);color:var(--gold);border-color:rgba(255,214,107,.45)}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}30%{transform:scale(1.12)}100%{transform:scale(1)}}
+  .count{color:var(--muted);font-size:10px;margin-top:8px}
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);min-height:540px;
+    overflow:hidden;backdrop-filter:blur(18px)}
+  .stage-head{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.014)}
+  .stage-title{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#cbd4e4}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--b);box-shadow:0 0 12px rgba(104,229,194,.8);animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.35;transform:scale(.75)}}
+  .stage-note{font-size:11px;color:var(--muted)}
+  .feed-inner{max-height:calc(100vh - 250px);min-height:485px;overflow:auto;padding:18px 22px}
+  .feed-inner::-webkit-scrollbar{width:6px}.feed-inner::-webkit-scrollbar-thumb{background:#263146;border-radius:10px}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:120px 20px;position:relative}
+  .empty::before{content:"✦";display:block;margin:0 auto 18px;width:58px;height:58px;line-height:58px;border-radius:18px;
+    font-size:22px;color:#aebdff;background:linear-gradient(145deg,rgba(124,156,255,.18),rgba(186,140,255,.06));border:1px solid var(--line)}
+  .ev{border-left:1px solid var(--line-strong);padding:1px 0 22px 20px;margin-left:7px;position:relative}
+  .ev::before{content:'';position:absolute;left:-6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--line)}
+  .ev.learn::before{background:var(--gold)} .ev.friend::before{background:var(--b)} .ev.pass::before{background:var(--muted)}
+  .ev .head{font-size:13px;margin-bottom:7px;color:#dfe5f0}.ev .head b{color:#fff}
+  .ev .reason{color:var(--muted);font-size:12px;font-style:italic;margin-bottom:9px}
+  .dlg{display:flex;flex-direction:column;gap:6px;margin-bottom:9px}
+  .line{font-size:12.5px;max-width:92%;padding:8px 11px;border-radius:11px;background:rgba(27,36,54,.72);border:1px solid var(--line)}
+  .line b{color:var(--a);font-weight:600;margin-right:5px}
+  .line.b b{color:var(--p)}
+  .outcome{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:20px}
+  .outcome.learn{background:rgba(255,212,59,.15);color:var(--gold)}
+  .outcome.friend{background:rgba(99,230,190,.14);color:var(--b)}
+  .outcome.pass{background:var(--card2);color:var(--muted)}
+  .thinking{color:var(--muted);font-size:13px;padding:13px 16px;border:1px dashed var(--line-strong);border-radius:12px;background:rgba(124,156,255,.035)}
+  .thinking .dots{display:inline-block;width:22px;text-align:left}
+  /* --- cinematic mode --- */
+  .btn.cinema-on{background:var(--gold);color:#0e1117;border-color:var(--gold)}
+  .flash{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;
+    background:radial-gradient(circle at 68% 42%,rgba(255,212,59,.30),transparent 58%)}
+  .flash.go{animation:flash 1.4s ease}
+  @keyframes flash{0%{opacity:0}16%{opacity:1}100%{opacity:0}}
+  .toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);
+    z-index:50;pointer-events:none;opacity:0;text-align:center;width:90%}
+  .toast .big{font-size:32px;font-weight:800;color:var(--gold);text-shadow:0 6px 30px rgba(255,212,59,.55)}
+  .toast .sm{color:var(--text);font-size:16px;margin-top:8px;opacity:.9}
+  .toast.go{animation:toast 2.4s cubic-bezier(.2,.9,.2,1)}
+  @keyframes toast{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+    15%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+    28%{transform:translate(-50%,-50%) scale(1)}
+    82%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-58%) scale(1)}}
+  .agent.celebrate{animation:celeb 1.8s ease}
+  @keyframes celeb{0%,100%{box-shadow:var(--shadow)}
+    30%{box-shadow:0 0 0 2px var(--gold),0 0 34px rgba(255,212,59,.6),var(--shadow)}}
+  body.cinema .chip.new{animation:popbig 1.8s ease}
+  @keyframes popbig{0%{transform:scale(.4);opacity:0}25%{transform:scale(1.4)}55%{transform:scale(1)}}
+  body.cinema .ev{animation:slidein .5s ease}
+  @keyframes slidein{0%{opacity:0;transform:translateY(-10px)}100%{opacity:1;transform:none}}
+  @media(max-width:900px){
+    .wrap{padding:20px 16px 52px}.top{align-items:flex-start;flex-direction:column}.controls{justify-content:flex-start}
+    .statusbar{grid-template-columns:repeat(3,1fr)}.mode-card{grid-column:1/-1}.layout{grid-template-columns:1fr}
+    .roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.feed-inner{max-height:none}
+  }
+  @media(max-width:580px){
+    .logo{font-size:20px}.sub{font-size:13px}.controls{width:100%}.btn{flex:1;padding-inline:8px}
+    .statusbar{gap:7px}.status-card{padding:10px}.metric-value{font-size:17px}.roster{grid-template-columns:1fr}
+    .stage{min-height:500px}.feed-inner{padding:15px 13px}.stage-note{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="top">
+      <div class="identity">
+        <div class="logo"><span class="mark">✦</span> <span id="brand">Aura</span></div>
+        <div class="sub" id="sub"></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="runBtn" onclick="toggleRun()"></button>
+        <button class="btn ghost" id="resetBtn" onclick="resetWorld()"></button>
+        <button class="btn ghost" id="cinemaBtn" onclick="toggleCinema()"></button>
+        <button class="btn lang" id="langBtn" onclick="toggleLang()"></button>
+      </div>
+    </div>
+    <div class="statusbar">
+      <div class="status-card mode-card"><span class="mode-dot"></span><span id="demoBadge"></span></div>
+      <div class="status-card"><div class="metric-label" id="encounterLabel"></div><div class="metric-value" id="encounterValue">0</div></div>
+      <div class="status-card"><div class="metric-label" id="learnLabel"></div><div class="metric-value" id="learnValue">0</div></div>
+      <div class="status-card"><div class="metric-label" id="friendLabel"></div><div class="metric-value" id="friendValue">0</div></div>
+    </div>
+  </div>
+  <div class="layout">
+    <div>
+      <div class="section-head"><div class="h" id="membersLabel"></div><div class="member-total" id="memberTotal"></div></div>
+      <div class="roster" id="roster"></div>
+    </div>
+    <div class="stage">
+      <div class="stage-head"><div class="stage-title"><span class="live-dot"></span><span id="activityLabel"></span></div><div class="stage-note" id="activityNote"></div></div>
+      <div class="feed-inner" id="feed"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- i18n ---------------- */
+const I18N = {
+  zh:{
+    brand:'Aura · AI 自治社会',
+    sub:'这些 AI 各自带着主人的性格和技能。开始后它们<b>自己</b>相遇、判断、交友、把有用的技能学过来——你只需要看着。 · <a href="/index.html">人机对话页 →</a>',
+    start:'▶ 开始自治', pause:'⏸ 暂停', resume:'▶ 继续', reset:'重置', langBtn:'EN',
+    cinema:'🎬 电影模式', cinemaOn:'🎬 电影中', learnedToast:s=>`学会了「${s}」`,
+    demo:'● 演示模式（未接真模型）', members:'社会成员',
+    encounterLabel:'相遇', learnLabel:'新技能', friendLabel:'新朋友',
+    activity:'实时动态', activityNote:'Agent 社会正在持续演化', memberTotal:n=>`${n} 位 Agent`,
+    emptyStart:'点「开始自治」，让这些 AI 自己动起来。<br>它们的技能栏会随着学习慢慢变长。',
+    emptyReset:'已重置。点「开始自治」重新跑一遍。',
+    skills:n=>`${n} 个技能`,
+    stat:(t,l,f)=>`第 ${t} 次相遇 · 学会 ${l} 个技能 · 结交 ${f} 对朋友`,
+    thinking:'两个 AI 正在相遇…', met:'遇见', thinks:'心想：',
+    learned:(a,s)=>`🎓 ${a} 学会了「${s}」`, friend:(a,b)=>`🤝 ${a} 和 ${b} 成了朋友`, pass:'· 擦肩而过',
+    errorHead:'出错：', errorHint:'大概率是没设置 ANTHROPIC_API_KEY，或额度问题。', noServer:'连不上服务器',
+  },
+  en:{
+    brand:'Aura · A Society of AIs',
+    sub:'Each AI carries its owner’s personality and skills. Once started, they meet, judge, befriend, and learn useful skills <b>on their own</b> — you just watch. · <a href="/index.html">Human chat page →</a>',
+    start:'▶ Start', pause:'⏸ Pause', resume:'▶ Resume', reset:'Reset', langBtn:'中文',
+    cinema:'🎬 Cinematic', cinemaOn:'🎬 Cinematic ✓', learnedToast:s=>`learned “${s}”`,
+    demo:'● Demo mode (no live model)', members:'Members',
+    encounterLabel:'Encounters', learnLabel:'Skills learned', friendLabel:'Friendships',
+    activity:'Live activity', activityNote:'The agent society is continuously evolving', memberTotal:n=>`${n} agents`,
+    emptyStart:'Hit “Start” and let the AIs move on their own.<br>Their skill rows grow as they learn.',
+    emptyReset:'Reset done. Hit “Start” to run it again.',
+    skills:n=>`${n} skill${n===1?'':'s'}`,
+    stat:(t,l,f)=>`${t} encounters · ${l} skills learned · ${f} friendships`,
+    thinking:'Two AIs are meeting…', met:'meets', thinks:'thinks: ',
+    learned:(a,s)=>`🎓 ${a} learned “${s}”`, friend:(a,b)=>`🤝 ${a} and ${b} became friends`, pass:'· passed by',
+    errorHead:'Error: ', errorHint:'Most likely ANTHROPIC_API_KEY is unset, or a quota issue.', noServer:'Cannot reach server',
+  },
+};
+let LANG = (navigator.language||'').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+const t = () => I18N[LANG];
+
+let world=null, running=false, ticks=0, learnCount=0, friendCount=0, lastNewChip=null;
+let cinema=false, actx=null;
+
+/* --- cinematic: sound + celebration --- */
+function audioCtx(){
+  if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(actx && actx.state==='suspended') actx.resume();
+  return actx;
+}
+function tone(freq,dur,type='sine',gain=0.06,when=0){
+  const a=audioCtx(); if(!a) return;
+  const o=a.createOscillator(), g=a.createGain(); o.type=type; o.frequency.value=freq;
+  const s=a.currentTime+when; o.connect(g); g.connect(a.destination);
+  g.gain.setValueAtTime(0,s); g.gain.linearRampToValueAtTime(gain,s+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,s+dur); o.start(s); o.stop(s+dur);
+}
+const sfxLearn  = ()=>{ tone(523.25,0.16,'sine',0.08,0); tone(783.99,0.34,'sine',0.08,0.12); }; // C5→G5
+const sfxFriend = ()=>{ tone(440,0.14,'triangle',0.05,0); };
+const sfxMeet   = ()=>{ tone(300,0.07,'sine',0.03,0); };
+function flash(){
+  let el=document.getElementById('flash');
+  if(!el){ el=document.createElement('div'); el.id='flash'; el.className='flash'; document.body.appendChild(el); }
+  el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
+}
+function celebrate(name, skill){
+  let el=document.getElementById('toast');
+  if(!el){ el=document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); }
+  el.innerHTML=`<div class="big">🎓 ${esc(name)}</div><div class="sm">${t().learnedToast(esc(skill))}</div>`;
+  el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
+}
+
+function applyChrome(){
+  const d=t();
+  document.documentElement.lang = LANG==='zh'?'zh-CN':'en';
+  document.getElementById('brand').textContent=d.brand;
+  document.getElementById('sub').innerHTML=d.sub;
+  document.getElementById('resetBtn').textContent=d.reset;
+  document.getElementById('langBtn').textContent=d.langBtn;
+  const cb=document.getElementById('cinemaBtn');
+  cb.textContent = cinema ? d.cinemaOn : d.cinema;
+  cb.classList.toggle('cinema-on', cinema);
+  document.getElementById('membersLabel').textContent=d.members;
+  document.getElementById('demoBadge').textContent=d.demo;
+  document.getElementById('encounterLabel').textContent=d.encounterLabel;
+  document.getElementById('learnLabel').textContent=d.learnLabel;
+  document.getElementById('friendLabel').textContent=d.friendLabel;
+  document.getElementById('activityLabel').textContent=d.activity;
+  document.getElementById('activityNote').textContent=d.activityNote;
+  document.getElementById('runBtn').textContent=running?d.pause:(ticks>0?d.resume:d.start);
+}
+
+async function loadWorld(){
+  world = await (await fetch('/api/world?lang='+LANG)).json();
+  document.getElementById('demoBadge').style.display = world.demo ? '' : 'none';
+  renderRoster();
+}
+function renderRoster(){
+  const d=t();
+  document.getElementById('memberTotal').textContent=d.memberTotal(world.agents.length);
+  document.getElementById('roster').innerHTML = world.agents.map(a=>`
+    <div class="agent" id="ag-${a.id}">
+      <div class="row"><div class="av">${a.emoji}</div>
+        <div><h4>${a.name}</h4><div class="ow">${a.owner}</div></div></div>
+      <div class="chips" id="chips-${a.id}">
+        ${a.skills.map(s=>`<span class="chip" data-k="${a.id}:${s.id}">${s.name}</span>`).join('')}
+      </div>
+      <div class="count">${d.skills(a.skills.length)}</div>
+    </div>`).join('');
+  if(lastNewChip){ const c=document.querySelector(`[data-k="${lastNewChip}"]`); if(c) c.classList.add('new'); }
+}
+function updateStat(){
+  document.getElementById('encounterValue').textContent=ticks;
+  document.getElementById('learnValue').textContent=learnCount;
+  document.getElementById('friendValue').textContent=friendCount;
+}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function renderEmpty(msg){ document.getElementById('feed').innerHTML=`<div class="empty">${msg}</div>`; }
+
+function renderEvent(r){
+  const d=t(); const feed=document.getElementById('feed');
+  if(feed.querySelector('.empty')) feed.innerHTML='';
+  const kind = r.learned?'learn':(r.befriend?'friend':'pass');
+  const dlg = r.dialogue.map(x=>{
+    const isA = x.speaker==='A';
+    const who = isA?`${r.a.emoji} ${r.a.name}`:`${r.b.emoji} ${r.b.name}`;
+    return `<div class="line ${isA?'':'b'}"><b>${who}</b>${esc(x.text)}</div>`;
+  }).join('');
+  let outcome;
+  if(r.learned) outcome=`<span class="outcome learn">${d.learned(r.a.name, r.learned.name)}</span>`;
+  else if(r.befriend) outcome=`<span class="outcome friend">${d.friend(r.a.name, r.b.name)}</span>`;
+  else outcome=`<span class="outcome pass">${d.pass}</span>`;
+  const div=document.createElement('div'); div.className='ev '+kind;
+  div.innerHTML=`
+    <div class="head"><b>${r.a.emoji} ${r.a.name}</b> ${d.met} <b>${r.b.emoji} ${r.b.name}</b></div>
+    ${r.reason?`<div class="reason">${r.a.name} ${d.thinks}${esc(r.reason)}</div>`:''}
+    <div class="dlg">${dlg}</div>${outcome}`;
+  feed.insertBefore(div, feed.firstChild);
+}
+function showThinking(){
+  const feed=document.getElementById('feed');
+  if(feed.querySelector('.empty')) feed.innerHTML='';
+  const el=document.createElement('div'); el.className='thinking'; el.id='thinking';
+  el.innerHTML=`${t().thinking}<span class="dots"></span>`;
+  feed.insertBefore(el, feed.firstChild);
+  let n=0; el._timer=setInterval(()=>{n=(n+1)%4; el.querySelector('.dots').textContent='.'.repeat(n);},350);
+}
+function clearThinking(){ const el=document.getElementById('thinking'); if(el){clearInterval(el._timer); el.remove();} }
+function renderError(msg){
+  const d=t(); const feed=document.getElementById('feed');
+  if(feed.querySelector('.empty')) feed.innerHTML='';
+  const div=document.createElement('div'); div.className='ev pass';
+  div.innerHTML=`<div class="head" style="color:var(--key)">${d.errorHead}${esc(msg)}</div><div class="reason">${d.errorHint}</div>`;
+  feed.insertBefore(div, feed.firstChild);
+}
+
+async function oneTick(){
+  showThinking();
+  if(cinema) sfxMeet();
+  let r;
+  try{
+    const [resp] = await Promise.all([
+      fetch('/api/tick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lang:LANG})}).then(x=>x.json()),
+      new Promise(res=>setTimeout(res, cinema?1400:650)),
+    ]);
+    r = resp;
+  }catch(e){ r={error:t().noServer}; }
+  clearThinking();
+  if(r.error){ renderError(r.error); running=false; applyChrome(); return; }
+  ticks++;
+  if(r.learned){ learnCount++; lastNewChip=`${r.a.id}:${r.learned.id}`; } else lastNewChip=null;
+  if(r.befriend) friendCount++;
+  world = r.world;
+  renderRoster(); renderEvent(r); updateStat();
+  [r.a.id,r.b.id].forEach(id=>{const c=document.getElementById('ag-'+id); if(c){c.classList.add('active'); setTimeout(()=>c.classList.remove('active'),1200);}});
+  if(cinema){
+    if(r.learned){
+      flash(); celebrate(r.a.name, r.learned.name); sfxLearn();
+      const c=document.getElementById('ag-'+r.a.id); if(c){ c.classList.add('celebrate'); setTimeout(()=>c.classList.remove('celebrate'),1800); }
+      await new Promise(res=>setTimeout(res, 1600)); // hold on the celebration
+    } else if(r.befriend){ sfxFriend(); }
+  }
+}
+async function loop(){ while(running){ await oneTick(); if(!running) break; await new Promise(r=>setTimeout(r, cinema?2400:1200)); } }
+function toggleRun(){
+  running=!running; applyChrome();
+  const b=document.getElementById('runBtn');
+  if(running){ b.classList.add('running'); loop(); } else { b.classList.remove('running'); }
+}
+function toggleCinema(){ cinema=!cinema; document.body.classList.toggle('cinema',cinema); audioCtx(); applyChrome(); }
+async function resetWorld(){
+  running=false; document.getElementById('runBtn').classList.remove('running');
+  ticks=learnCount=friendCount=0; lastNewChip=null;
+  world=await (await fetch('/api/reset?lang='+LANG,{method:'POST'})).json();
+  applyChrome(); renderRoster(); updateStat(); renderEmpty(t().emptyReset);
+}
+async function toggleLang(){
+  LANG = LANG==='zh' ? 'en' : 'zh';
+  running=false; document.getElementById('runBtn').classList.remove('running');
+  ticks=learnCount=friendCount=0; lastNewChip=null;
+  await loadWorld(); applyChrome(); updateStat(); renderEmpty(t().emptyStart);
+}
+
+/* init */
+(async function(){ await loadWorld(); applyChrome(); updateStat(); renderEmpty(t().emptyStart); })();
+</script>
+</body>
+</html>
