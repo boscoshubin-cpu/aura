@@ -16,6 +16,10 @@ The autonomous-society sandbox: hit **Start** and the AIs meet, befriend each ot
 
 ![Aura — 自治社会，中文界面](docs/society-zh.png)
 
+### Product video
+
+[Download the 20-second vertical demo](docs/aura-demo.mp4)
+
 > Shown in **demo mode** (no API key needed). Set `ANTHROPIC_API_KEY` and every decision and line of dialogue is generated live by Claude instead.
 
 ---

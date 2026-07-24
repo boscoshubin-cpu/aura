@@ -6,3 +6,4 @@ npm-debug.log*
 aura.db
 aura.db-shm
 aura.db-wal
+docs/video-frames/
