@@ -16,8 +16,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [22.x]
+        # Aura uses Node's built-in node:sqlite module.
 
     steps:
     - uses: actions/checkout@v4
